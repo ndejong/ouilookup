@@ -25,6 +25,8 @@ class OuiLookup:
     debug = None
     datafile = None
 
+    __dataset_cache = None
+
     def __init__(self):
         self.arg_parse()
         self.Log = LoggerManager.LoggerManager().build_logger(
@@ -138,8 +140,7 @@ class OuiLookup:
 
         response = []
 
-        with open(self.datafile, 'r') as f:
-            data = json.load(f)
+        data = self.__get_dataset()
 
         for vendor_key, vendor_name in data['vendors'].items():
             for term in terms:
@@ -151,13 +152,12 @@ class OuiLookup:
     def datafile_status(self):
         self.Log.debug('OuiLookup::datafile_status()')
 
-        with open(self.datafile, 'r') as f:
-            data = json.load(f)
+        data = self.__get_dataset()
 
-        data['meta']['data_path'] = self.DATA_PATH
-        data['meta']['data_file'] = self.datafile
-
-        return data['meta']
+        return {
+            **data['meta'],
+            **{'data_path': self.DATA_PATH, 'data_file': self.datafile}
+        }
 
     def datafile_checks(self):
         self.Log.debug('OuiLookup::datafile_checks()')
@@ -228,4 +228,13 @@ class OuiLookup:
             self.Log.fatal('Unable to save datafile - {}'.format(e))
             exit(1)
 
+        self.__dataset_cache = data
         return data['meta']
+
+    def __get_dataset(self):
+        self.Log.debug('OuiLookup::__get_dataset()')
+
+        if self.__dataset_cache is None:
+            with open(self.datafile, 'r') as f:
+                self.__dataset_cache = json.load(f)
+        return self.__dataset_cache

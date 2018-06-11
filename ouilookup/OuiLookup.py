@@ -5,6 +5,7 @@ import argparse
 import time
 import hashlib
 import urllib.request
+from shutil import copyfile
 from ouilookup import LoggerManager
 
 
@@ -15,35 +16,36 @@ class OuiLookupException(Exception):
 class OuiLookup:
 
     SOURCE_URI = 'http://standards-oui.ieee.org/oui.txt'
-    DATA_PATH = '/var/lib/ouilookup'
-    LOCAL_FILENAME = 'oui.txt'
+    DATA_PATHS = ['/var/lib/ouilookup', '~/.ouilookup', os.path.join(os.path.dirname(__file__),'data')]
+    SOURCE_FILENAME = 'oui.txt'
     DATA_FILENAME = 'oui.json'
 
     Log = None
 
     args = None
     debug = None
-    datafile = None
+    data_file = None
 
-    __dataset_cache = None
+    __data_cache = None
 
     def __init__(self):
+
         self.arg_parse()
+        
         self.Log = LoggerManager.LoggerManager().build_logger(
             'ouilookup',
             is_console_quiet=True,
             is_console_debug=self.debug
         )
-        self.datafile = os.path.join(self.DATA_PATH, self.DATA_FILENAME)
 
     def arg_parse(self):
         ArgParse = argparse.ArgumentParser(
             prog='ouilookup',
-            description='A CLI tool for interfacing with the OuiLookup library which can be easily integrated '
-                        'programmatically into other projects - Up-to-date source data can be easily managed and '
-                        'retrieved from the ieee.org site - outputs at the CLI are JSON formatted allowing for '
-                        'easy chaining to other toolchains and programmatic queries via OuiLookup return the same '
-                        'data-structures.',
+            description='A CLI tool for interfacing with the OuiLookup library, to access the query(), update() and '
+                        'status() functions. Outputs at the CLI are JSON formatted allowing for easy chaining to other '
+                        'toolchains and return the same data-structures when calling via the OuiLookup library '
+                        'directly. The update() function updates directly from "standards-oui.ieee.org" and the '
+                        'ouilookup package provides a fallback oui.txt updated at time of packaging.',
         )
 
         ArgParseGroup0 = ArgParse.add_mutually_exclusive_group()
@@ -65,15 +67,16 @@ class OuiLookup:
             default=False,
             action='store_true',
             help='Download from "standards-oui.ieee.org" a local copy of the oui.txt file, then parse and update the '
-                 'locally stored oui.json datafile for use with OuiLookup either in programmatic or CLI use.'
+                 'locally stored oui.json data_file for use with the OuiLookup library. The following paths (in order) '
+                 'are examined for write-access to save the oui.json data_file: {}'.format(', '.join(self.DATA_PATHS))
         )
         ArgParseGroup0.add_argument(
             '--update-no-download',
             required=False,
             default=False,
             action='store_true',
-            help='Parse the previously existing oui.txt file in the data path and update the locally stored oui.json '
-                 'datafile.'
+            help='Parse a previously existing oui.txt file in the data_path and update the locally stored oui.json '
+                 'data_file without attempting to download from "standards-oui.ieee.org".'
         )
         ArgParseGroup0.add_argument(
             '-s',
@@ -81,7 +84,7 @@ class OuiLookup:
             required=False,
             default=False,
             action='store_true',
-            help='Return status information about the locally stored oui.json datafile.'
+            help='Return status information about oui.json data_file available to OuiLookup.'
         )
 
         ArgParseGroup1 = ArgParse.add_argument_group()
@@ -104,30 +107,30 @@ class OuiLookup:
             ArgParse.print_help()
             exit(1)
 
-    def main(self):
-        self.Log.debug('OuiLookup::main()')
+    def cli(self):
+        self.Log.debug('OuiLookup::cli()')
 
         response = None
 
-        if self.args.update is True:
-            response = self.datafile_update()
+        try:
+            if self.args.update is True:
+                response = self.data_file_update()
 
-        elif self.args.update_no_download is True:
-            response = self.datafile_update(skip_download=True)
+            elif self.args.update_no_download is True:
+                response = self.data_file_update(skip_download=True)
 
-        else:
+            elif self.args.status is True:
+                response = self.data_file_status()
 
-            try:
-                self.datafile_checks()
-            except OuiLookupException as e:
-                self.Log.fatal(e)
-                exit(1)
-
-            if self.args.status is True:
-                response = self.datafile_status()
-
-            if self.args.query is not False:
+            elif self.args.query is not False:
                 response = self.query(expression=self.args.query)
+
+            else:
+                raise OuiLookupException('Unexpected args condition')
+
+        except OuiLookupException as e:
+            self.Log.fatal(e)
+            exit(1)
 
         print(json.dumps(response, indent='  ', sort_keys=True))
         return response
@@ -139,8 +142,7 @@ class OuiLookup:
         self.Log.debug('OuiLookup::query() - terms {}'.format(terms))
 
         response = []
-
-        data = self.__get_dataset()
+        data = self.__get_data()
 
         for vendor_key, vendor_name in data['vendors'].items():
             for term in terms:
@@ -149,62 +151,70 @@ class OuiLookup:
 
         return response
 
-    def datafile_status(self):
-        self.Log.debug('OuiLookup::datafile_status()')
+    def data_file_status(self):
+        self.Log.debug('OuiLookup::data_file_status()')
 
-        data = self.__get_dataset()
+        data = self.__get_data()
 
         return {
             **data['meta'],
-            **{'data_path': self.DATA_PATH, 'data_file': self.datafile}
+            **{'data_path': os.path.dirname(self.data_file), 'data_file': self.data_file}
         }
 
-    def datafile_checks(self):
-        self.Log.debug('OuiLookup::datafile_checks()')
+    def data_file_update(self, skip_download=False):
+        self.Log.debug('OuiLookup::data_file_update()')
 
-        if not os.path.isdir(self.DATA_PATH):
-            raise OuiLookupException('Unable to locate required data path, try running with --update to create the '
-                                     'path and download the required oui datafile.', self.DATA_PATH)
+        data_path_usable = None
+        data_file_usable = None
+        for data_path in self.DATA_PATHS:
+            data_path_expanded = os.path.expanduser(data_path)
+            if not os.path.isdir(data_path_expanded):
+                try:
+                    os.makedirs(data_path_expanded, mode=0o0755, exist_ok=True)
+                    self.Log.debug('OuiLookup::data_file_update() - data path created {}'.format(data_path_expanded))
+                except Exception:
+                    pass
 
-        if not os.path.isfile(self.datafile):
-            raise OuiLookupException('Unable to locate required data file, try running with --update to download the '
-                                     'oui data and create the required datafile.', self.datafile)
+            if os.path.isdir(data_path_expanded):
+                try:
+                    data_file_usable = os.path.join(data_path_expanded, self.DATA_FILENAME)
+                    self.file_touch(data_file_usable)
+                    data_path_usable = data_path_expanded
+                    break
+                except Exception:
+                    pass
 
-        self.Log.debug('OuiLookup::datafile_checks() - Okay')
-        return True
+        if data_path_usable is None:
+            raise OuiLookupException('Unable to locate a data_path with write permissions', self.DATA_PATHS)
 
-    def datafile_update(self, skip_download=False):
-        self.Log.debug('OuiLookup::datafile_update()')
-
-        if not os.path.isdir(self.DATA_PATH):
-            try:
-                os.makedirs(self.DATA_PATH, mode=0o0755, exist_ok=True)
-            except Exception as e:
-                self.Log.fatal('Unable to create data path - {}'.format(e))
-                exit(1)
-            self.Log.debug('OuiLookup::datafile_update() - data path created {}'.format(self.DATA_PATH))
-
-        local_filename = os.path.join(self.DATA_PATH, self.LOCAL_FILENAME)
+        source_filename = os.path.join(data_path_usable, self.SOURCE_FILENAME)
 
         if skip_download is False:
             try:
-                self.Log.debug('OuiLookup::datafile_update() - downloading {} to {}'.format(self.SOURCE_URI, local_filename))
-                urllib.request.urlretrieve(self.SOURCE_URI, local_filename)
+                self.Log.debug('OuiLookup::data_file_update() - downloading {} to {}'.format(self.SOURCE_URI, source_filename))
+                urllib.request.urlretrieve(self.SOURCE_URI, source_filename)
             except Exception as e:
-                self.Log.fatal('Unable to download from data source - {}'.format(e))
-                exit(1)
+                raise OuiLookupException('Unable to download from data source - {}'.format(e))
 
-        if not os.path.isfile(local_filename):
-            self.Log.fatal('Missing local source file {}'.format(local_filename))
-            exit(1)
-        self.Log.debug('Local source file {}'.format(local_filename))
+        if not os.path.isfile(source_filename):
+            for data_path_source in self.DATA_PATHS:
+                source_filename_probe = os.path.join(data_path_source, self.SOURCE_FILENAME)
+                if os.path.isfile(source_filename_probe):
+                    self.Log.debug('OuiLookup::data_file_update() - copying {} to {}'.format(source_filename_probe, source_filename))
+                    copyfile(source_filename_probe, source_filename)
+                    break
 
-        with open(local_filename, 'rb') as f:
+        if not os.path.isfile(source_filename):
+            raise OuiLookupException('Unable to locate any source_file to work with')
+
+        self.Log.debug('OuiLookup::data_file_update() - using source file {}'.format(source_filename))
+
+        with open(source_filename, 'rb') as f:
             raw = f.read()
 
         data = {}
         data['meta'] = {
-            'timestamp_retrieved': time.strftime("%Y%m%dZ%H%M%S", time.gmtime(os.path.getctime(local_filename))),
+            'timestamp': time.strftime("%Y%m%dZ%H%M%S", time.gmtime(os.path.getctime(source_filename))),
             'source_uri': self.SOURCE_URI,
             'source_bytes': len(raw),
             'source_md5': hashlib.md5(raw).hexdigest(),
@@ -222,19 +232,34 @@ class OuiLookup:
                 data['meta']['vendor_count'] +=1
 
         try:
-            with open(self.datafile, 'w') as f:
+            self.Log.debug('OuiLookup::data_file_update() - writing data_file {}'.format(data_file_usable))
+            with open(data_file_usable, 'w') as f:
                 f.write(json.dumps(data, indent='  ', sort_keys=True))
         except Exception as e:
-            self.Log.fatal('Unable to save datafile - {}'.format(e))
-            exit(1)
+            raise OuiLookupException('Unable to save data_file - {}'.format(e))
 
-        self.__dataset_cache = data
+        self.data_file = data_file_usable
+        self.__data_cache = data
         return data['meta']
 
-    def __get_dataset(self):
-        self.Log.debug('OuiLookup::__get_dataset()')
+    def file_touch(self, filename, times=None):
+        with open(filename, 'a'):
+            os.utime(filename, times)
 
-        if self.__dataset_cache is None:
-            with open(self.datafile, 'r') as f:
-                self.__dataset_cache = json.load(f)
-        return self.__dataset_cache
+    def __get_data(self):
+        self.Log.debug('OuiLookup::__get_data()')
+
+        if self.__data_cache is None:
+            for data_path in self.DATA_PATHS:
+                data_file = os.path.expanduser(os.path.join(data_path, self.DATA_FILENAME))
+                if os.path.isfile(data_file):
+                    self.data_file = data_file
+                    self.Log.debug('OuiLookup::__get_data() - loading data_file {}'.format(data_file))
+                    with open(self.data_file, 'r') as f:
+                        self.__data_cache = json.load(f)
+                        break
+
+            if self.__data_cache is None:
+                raise OuiLookupException('Unable to locate a data file in paths', self.DATA_PATHS)
+
+        return self.__data_cache

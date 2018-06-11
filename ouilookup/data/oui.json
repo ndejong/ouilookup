@@ -1,11 +1,11 @@
 {
   "meta": {
     "source_bytes": 3911106,
-    "source_md5": "cdee9d30a0563ccb56b3ba719c2f793b",
-    "source_sha1": "11d9ab34af76b4a13bf28cf3a1ab149ac4a7a559",
-    "source_sha256": "056fd6a00b51ca1bbdd7fc00df303253f0433b85dd0f1cbd0fc458b5da36cfb9",
+    "source_md5": "af9157e8d969100e8b00bf281f92d2ac",
+    "source_sha1": "2f835cbb45ab01cd0d36c94450bbee9b1b59dc84",
+    "source_sha256": "306e1f5078017a5c3bc999ae69b052b4e68d5ae83ca04053ae102596c9c553d2",
     "source_uri": "http://standards-oui.ieee.org/oui.txt",
-    "timestamp_retrieved": "20180610Z130046",
+    "timestamp": "20180611Z103551",
     "vendor_count": 24967
   },
   "vendors": {

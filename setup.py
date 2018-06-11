@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name='ouilookup',
@@ -23,11 +23,13 @@ setup(
     license='Apache',
 
     packages=['ouilookup'],
-    data_files=[
-        ('/var/lib/ouilookup/oui.txt', ['data/oui.txt']),
-        ('/var/lib/ouilookup/oui.json', ['data/oui.json']),
-    ],
+
+    package_data={
+        'ouilookup': ['data/*.json', 'data/*.txt'],
+    },
+
     scripts=['bin/ouilookup'],
+
     install_requires=[],
 
 )

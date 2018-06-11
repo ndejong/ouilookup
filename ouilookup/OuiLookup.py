@@ -29,14 +29,7 @@ class OuiLookup:
     __data_cache = None
 
     def __init__(self):
-
-        self.arg_parse()
-        
-        self.Log = LoggerManager.LoggerManager().build_logger(
-            'ouilookup',
-            is_console_quiet=True,
-            is_console_debug=self.debug
-        )
+        self.Log = LoggerManager.LoggerNull()
 
     def arg_parse(self):
         ArgParse = argparse.ArgumentParser(
@@ -108,19 +101,28 @@ class OuiLookup:
             exit(1)
 
     def cli(self):
+
+        self.arg_parse()
+
+        self.Log = LoggerManager.LoggerManager().build_logger(
+            'ouilookup',
+            is_console_quiet=True,
+            is_console_debug=self.debug
+        )
+
         self.Log.debug('OuiLookup::cli()')
 
         response = None
 
         try:
             if self.args.update is True:
-                response = self.data_file_update()
+                response = self.update()
 
             elif self.args.update_no_download is True:
-                response = self.data_file_update(skip_download=True)
+                response = self.update(skip_download=True)
 
             elif self.args.status is True:
-                response = self.data_file_status()
+                response = self.status()
 
             elif self.args.query is not False:
                 response = self.query(expression=self.args.query)
@@ -151,8 +153,8 @@ class OuiLookup:
 
         return response
 
-    def data_file_status(self):
-        self.Log.debug('OuiLookup::data_file_status()')
+    def status(self):
+        self.Log.debug('OuiLookup::status()')
 
         data = self.__get_data()
 
@@ -161,8 +163,8 @@ class OuiLookup:
             **{'data_path': os.path.dirname(self.data_file), 'data_file': self.data_file}
         }
 
-    def data_file_update(self, skip_download=False):
-        self.Log.debug('OuiLookup::data_file_update()')
+    def update(self, skip_download=False):
+        self.Log.debug('OuiLookup::update()')
 
         data_path_usable = None
         data_file_usable = None
@@ -171,7 +173,7 @@ class OuiLookup:
             if not os.path.isdir(data_path_expanded):
                 try:
                     os.makedirs(data_path_expanded, mode=0o0755, exist_ok=True)
-                    self.Log.debug('OuiLookup::data_file_update() - data path created {}'.format(data_path_expanded))
+                    self.Log.debug('OuiLookup::update() - data path created {}'.format(data_path_expanded))
                 except Exception:
                     pass
 
@@ -191,7 +193,7 @@ class OuiLookup:
 
         if skip_download is False:
             try:
-                self.Log.debug('OuiLookup::data_file_update() - downloading {} to {}'.format(self.SOURCE_URI, source_filename))
+                self.Log.debug('OuiLookup::update() - downloading {} to {}'.format(self.SOURCE_URI, source_filename))
                 urllib.request.urlretrieve(self.SOURCE_URI, source_filename)
             except Exception as e:
                 raise OuiLookupException('Unable to download from data source - {}'.format(e))
@@ -200,14 +202,14 @@ class OuiLookup:
             for data_path_source in self.DATA_PATHS:
                 source_filename_probe = os.path.join(data_path_source, self.SOURCE_FILENAME)
                 if os.path.isfile(source_filename_probe):
-                    self.Log.debug('OuiLookup::data_file_update() - copying {} to {}'.format(source_filename_probe, source_filename))
+                    self.Log.debug('OuiLookup::update() - copying {} to {}'.format(source_filename_probe, source_filename))
                     copyfile(source_filename_probe, source_filename)
                     break
 
         if not os.path.isfile(source_filename):
             raise OuiLookupException('Unable to locate any source_file to work with')
 
-        self.Log.debug('OuiLookup::data_file_update() - using source file {}'.format(source_filename))
+        self.Log.debug('OuiLookup::update() - using source file {}'.format(source_filename))
 
         with open(source_filename, 'rb') as f:
             raw = f.read()
@@ -232,7 +234,7 @@ class OuiLookup:
                 data['meta']['vendor_count'] +=1
 
         try:
-            self.Log.debug('OuiLookup::data_file_update() - writing data_file {}'.format(data_file_usable))
+            self.Log.debug('OuiLookup::update() - writing data_file {}'.format(data_file_usable))
             with open(data_file_usable, 'w') as f:
                 f.write(json.dumps(data, indent='  ', sort_keys=True))
         except Exception as e:

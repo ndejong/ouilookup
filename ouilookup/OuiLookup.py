@@ -147,10 +147,13 @@ class OuiLookup:
         data = self.__get_data()
 
         for term in terms:
+            term_found = False
             for vendor_key, vendor_name in data['vendors'].items():
                 if term.startswith(vendor_key):
                     response.append({term: vendor_name})
-            if term not in response:
+                    term_found = True
+                    break
+            if term_found is not True:
                 response.append({term: None})
 
         return response

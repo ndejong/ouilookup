@@ -140,16 +140,18 @@ class OuiLookup:
     def query(self, expression):
         self.Log.debug('OuiLookup::query(expression={})'.format(expression))
 
-        terms = expression.replace('-','').replace(':','').upper().split(' ')
+        terms = expression.replace(':','').replace('-','').replace('.','').upper().split(' ')
         self.Log.debug('OuiLookup::query() - terms {}'.format(terms))
 
         response = []
         data = self.__get_data()
 
-        for vendor_key, vendor_name in data['vendors'].items():
-            for term in terms:
+        for term in terms:
+            for vendor_key, vendor_name in data['vendors'].items():
                 if term.startswith(vendor_key):
                     response.append({term: vendor_name})
+            if term not in response:
+                response.append({term: None})
 
         return response
 

@@ -140,13 +140,15 @@ class OuiLookup:
     def query(self, expression):
         self.Log.debug('OuiLookup::query(expression={})'.format(expression))
 
-        terms = expression.replace(':','').replace('-','').replace('.','').upper().split(' ')
+        terms = expression.strip().replace(':','').replace('-','').replace('.','').upper().split(' ')
         self.Log.debug('OuiLookup::query() - terms {}'.format(terms))
 
         response = []
         data = self.__get_data()
 
         for term in terms:
+            if len(term) < 1:
+                continue
             term_found = False
             for vendor_key, vendor_name in data['vendors'].items():
                 if term.startswith(vendor_key):
@@ -234,7 +236,7 @@ class OuiLookup:
         for raw_line in raw.decode('utf8').replace('\r','').split('\n'):
             if '(hex)' in raw_line and '-' in raw_line:
                 address = raw_line[0:raw_line.find('(hex)')].rstrip(' ').replace('-','')
-                name = raw_line[raw_line.find('(hex)'):].replace('(hex)', '').replace('\t','').lstrip(' ').rstrip(' ')
+                name = raw_line[raw_line.find('(hex)'):].replace('(hex)', '').replace('\t','').strip()
                 data['vendors'][address] = name
                 data['meta']['vendor_count'] +=1
 

@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='ouilookup',
-    version='2018.6',
+    version='2018.7',
     description='A tool and library for looking up hardware MAC addresses in the OUI list from ieee.org.',
     long_description='A tool and library for looking up hardware MAC addresses in the OUI list from ieee.org.',
 

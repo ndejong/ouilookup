@@ -57,3 +57,9 @@ arguments:
                         available to OuiLookup.
   -d, --debug           Provide debug logging output to stderr.
 ```
+
+## Authors
+This code is managed by [Verb Networks](https://github.com/verbnetworks).
+
+## License
+Apache 2 Licensed. See LICENSE file for full details.

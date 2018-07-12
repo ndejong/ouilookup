@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='ouilookup',
-    version='2018.7',
+    version='2018.8',
     description='A tool and library for looking up hardware MAC addresses in the OUI list from ieee.org.',
     long_description='A tool and library for looking up hardware MAC addresses in the OUI list from ieee.org.',
 
@@ -18,9 +18,9 @@ setup(
     ],
     keywords='ouilookup oui mac mac-address hw-address ether ethernet arp',
 
-    author='Nicholas de Jong',
-    author_email='me@nicholasdejong.com',
-    url='https://github.com/ndejong/ouilookup',
+    author='Verb Networks Pty Ltd',
+    author_email='contact@verbnetworks.com',
+    url='https://github.com/verbnetworks/ouilookup',
     license='Apache',
 
     packages=['ouilookup'],

@@ -1,36 +1,45 @@
 #!/usr/bin/env python3
 
-from setuptools import setup
+from setuptools import setup, find_packages
+from OuiLookup import NAME
+from OuiLookup import VERSION
+
+with open('README.md', 'r') as f:
+    long_description = f.read()
+
 
 setup(
-    name='ouilookup',
-    version='2018.8',
-    description='A tool and library for looking up hardware MAC addresses in the OUI list from ieee.org.',
-    long_description='A tool and library for looking up hardware MAC addresses in the OUI list from ieee.org.',
+    name=NAME,
+    version=VERSION,
+    description='A CLI tool and Python3 module for looking up hardware MAC addresses from the published OUI source at ieee.org.',
+
+    long_description=long_description,
+    long_description_content_type='text/markdown',
 
     classifiers=[
         'Environment :: Console',
-        'Topic :: Software Development :: Libraries :: Python Modules',
         'Intended Audience :: System Administrators',
-        'Intended Audience :: Information Technology',
         'Topic :: System :: Networking :: Monitoring',
-        'License :: OSI Approved :: Apache Software License',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: BSD License',
     ],
-    keywords='ouilookup oui mac mac-address hw-address ether ethernet arp',
+    keywords='ouilookup oui mac mac-address hw-address ether ethernet',
 
     author='Verb Networks Pty Ltd',
     author_email='contact@verbnetworks.com',
     url='https://github.com/verbnetworks/ouilookup',
-    license='Apache',
+    license='BSD-2-Clause',
 
-    packages=['ouilookup'],
-
+    zip_safe=False,
+    packages=find_packages(),
     package_data={
-        'ouilookup': ['data/*.json', 'data/*.txt'],
+        'OuiLookup': ['data/*.json', 'data/*.txt'],
     },
-
     scripts=['bin/ouilookup'],
 
     install_requires=[],
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest'],
 
 )

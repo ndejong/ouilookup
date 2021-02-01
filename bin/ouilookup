@@ -6,7 +6,7 @@ import argparse
 
 try:
     import OuiLookup
-except:
+except ModuleNotFoundError as e:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     import OuiLookup
 
@@ -41,8 +41,7 @@ parser_group0.add_argument(
     default=False,
     action='store_true',
     help='Download the latest oui.txt from "standards-oui.ieee.org" and parse it to generate a local oui.json for use '
-         'by OuiLookup. The following paths (in order) are examined for write-access to save the oui.json data-file: '
-         '{}'.format(', '.join(OuiLookup.DATA_PATH_DEFAULTS))
+         'by OuiLookup.'
 )
 parser_group0.add_argument(
     '-un',

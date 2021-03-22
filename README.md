@@ -16,6 +16,11 @@ A CLI tool and Python3 module for looking up hardware MAC addresses from the pub
 pip3 install ouilookup
 ```
 
+#### Arch Linux (via AUR, and your favorite AUR-helper)
+```bash
+yay -S ouilookup-py3
+```
+
 #### via Source
 ```bash
 git clone https://github.com/verbnetworks/ouilookup

@@ -2,7 +2,7 @@
 
 [![PyPi](https://img.shields.io/pypi/v/ouilookup.svg)](https://pypi.python.org/pypi/ouilookup/)
 [![Python Versions](https://img.shields.io/pypi/pyversions/ouilookup.svg)](https://github.com/verbnetworks/ouilookup/)
-
+[![build tests](https://github.com/verbnetworks/ouilookup/actions/workflows/build-tests.yml/badge.svg)](https://github.com/verbnetworks/ouilookup/actions/workflows/build-tests.yml)
 [![License](https://img.shields.io/github/license/verbnetworks/ouilookup.svg)](https://github.com/verbnetworks/ouilookup)
 
 A CLI tool and Python3 module for looking up hardware MAC addresses from the published OUI source list at ieee.org.

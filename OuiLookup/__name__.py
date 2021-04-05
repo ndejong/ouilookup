@@ -1,2 +1,2 @@
 
-NAME='ouilookup'
+NAME = 'ouilookup'

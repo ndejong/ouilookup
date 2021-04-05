@@ -34,7 +34,7 @@ class OuiLookup:
     def query(self, expression):
         logger.debug('OuiLookup::query(expression={})'.format(expression))
 
-        terms = expression.strip().replace(':','').replace('-','').replace('.','').upper().split(' ')
+        terms = expression.strip().replace(':', '').replace('-', '').replace('.', '').upper().split(' ')
         logger.debug('OuiLookup::query() - terms {}'.format(terms))
 
         response = []
@@ -104,7 +104,8 @@ class OuiLookup:
             for data_path_source in self.data_paths:
                 source_filename_probe = os.path.join(data_path_source, SOURCE_FILENAME)
                 if os.path.isfile(source_filename_probe):
-                    logger.debug('OuiLookup::update() - copying {} to {}'.format(source_filename_probe, source_file_writeable))
+                    logger.debug('OuiLookup::update() - copying {} to {}'.format(source_filename_probe,
+                                                                                 source_file_writeable))
                     copyfile(source_filename_probe, source_file_writeable)
                     break
 
@@ -128,12 +129,12 @@ class OuiLookup:
         }
 
         data['vendors'] = {}
-        for raw_line in raw.decode('utf8').replace('\r','').split('\n'):
+        for raw_line in raw.decode('utf8').replace('\r', '').split('\n'):
             if '(hex)' in raw_line and '-' in raw_line:
-                address = raw_line[0:raw_line.find('(hex)')].rstrip(' ').replace('-','')
-                name = raw_line[raw_line.find('(hex)'):].replace('(hex)', '').replace('\t','').strip()
+                address = raw_line[0:raw_line.find('(hex)')].rstrip(' ').replace('-', '')
+                name = raw_line[raw_line.find('(hex)'):].replace('(hex)', '').replace('\t', '').strip()
                 data['vendors'][address] = name
-                data['meta']['vendor_count'] +=1
+                data['meta']['vendor_count'] += 1
 
         data_filename = os.path.join(data_path_writeable, DATA_FILENAME)
 

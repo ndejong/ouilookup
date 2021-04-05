@@ -33,7 +33,7 @@ jobs:
         # https://flake8.pycqa.org/en/latest/user/error-codes.html
         # https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes
         flake8 ./OuiLookup --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 ./OuiLookup --count --exit-zero --max-complexity=20 --max-line-length=120 --statistics --ignore=E402
+        flake8 ./OuiLookup --count --exit-zero --max-complexity=20 --max-line-length=120 --statistics --ignore=E402,F401
 
     - name: python setup.py clean build
       run: |
@@ -49,6 +49,6 @@ jobs:
       run: |
         python setup.py install
 
-    - name: arpwitch --version
+    - name: ouilookup --status
       run: |
         ouilookup --status

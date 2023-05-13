@@ -21,10 +21,10 @@ jobs:
     - name: Create a venv to operate within using slap-cli
       run: |
         slap venv -gc tester
-        slap venv -ga tester
 
     - name: Install, test and build a package to install
       run: |
+        slap venv -ga tester
         slap install
         slap test
         mkdir test-build

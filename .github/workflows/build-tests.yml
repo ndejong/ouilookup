@@ -19,7 +19,7 @@ jobs:
       with: { python-version: "${{ matrix.python-version }}" }
 
     - name: Create tester venv for slap-cli
-    - run: |
+      run: |
         slap venv --create tester
         slap install --use-venv=tester
 

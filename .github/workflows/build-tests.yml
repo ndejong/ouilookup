@@ -18,17 +18,18 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "${{ matrix.python-version }}" }
 
-    - name: Create tester venv for slap-cli
+    - name: Create a venv to operate within using slap-cli
       run: |
         slap venv --create tester
-        slap install --use-venv=tester
 
-    - name: Validate and test with slap-cli
+    - name: Install, test and build a package to install
       run: |
-        slap release --validate
+        slap install --use-venv=tester
         slap test --use-venv=tester
-        slap install --use-venv=tester
+        mkdir build-tester
+        slap publish --build-directory build-tester --dry
 
-    - name: ouilookup --status
+    - name: Install the package from whl and run the application
       run: |
+        pip install build-tester/*.whl
         ouilookup --status

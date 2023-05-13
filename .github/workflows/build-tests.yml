@@ -29,6 +29,7 @@ jobs:
         slap test --use-venv=tester
         slap install --use-venv=tester
 
-    - name: ouilookup --status
+    - name: Test run the application
       run: |
+        slap venv --add tester
         ouilookup --status

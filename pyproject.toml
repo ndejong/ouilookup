@@ -25,6 +25,9 @@ Documentation = "https://github.com/ndejong/ouilookup"
 Homepage = "https://pypi.org/project/ouilookup/"
 Repository = "https://github.com/ndejong/ouilookup"
 
+[tool.poetry.scripts]
+ouilookup = "ouilookup.cli:cli"
+
 [tool.poetry.dependencies]
 python = "^3.6"
 

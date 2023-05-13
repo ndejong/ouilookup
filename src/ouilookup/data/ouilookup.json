@@ -1,12 +1,12 @@
 {
   "meta": {
     "source_bytes": "5468392",
-    "source_data_file": "/tmp/ouilookup-6byx1ox0/oui.txt",
+    "source_data_file": "/tmp/ouilookup-qm5aq0dk/oui.txt",
     "source_md5": "55a434f90da0c24c1a4fcfefe5b2b64b",
     "source_sha1": "dd5e8849ab8c65b2fb12c4b5aef290afee6bbfcd",
     "source_sha256": "af7e4bb1394109f4faad814074d3a6d5b792078074549a5d554c0904612c0bfc",
     "source_url": "https://standards-oui.ieee.org/oui/oui.txt",
-    "timestamp": "2023-05-13T13:06:22+00:00",
+    "timestamp": "2023-05-13T14:11:17+00:00",
     "vendor_count": "33808"
   },
   "vendors": {

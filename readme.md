@@ -1,36 +1,19 @@
 # ouilookup
 
 [![PyPi](https://img.shields.io/pypi/v/ouilookup.svg)](https://pypi.python.org/pypi/ouilookup/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/ouilookup.svg)](https://github.com/verbnetworks/ouilookup/)
-[![build tests](https://github.com/verbnetworks/ouilookup/actions/workflows/build-tests.yml/badge.svg)](https://github.com/verbnetworks/ouilookup/actions/workflows/build-tests.yml)
-[![License](https://img.shields.io/github/license/verbnetworks/ouilookup.svg)](https://github.com/verbnetworks/ouilookup)
+[![Python Versions](https://img.shields.io/pypi/pyversions/ouilookup.svg)](https://github.com/ndejong/ouilookup/)
+[![build tests](https://github.com/ndejong/ouilookup/actions/workflows/build-tests.yml/badge.svg)](https://github.com/ndejong/ouilookup/actions/workflows/build-tests.yml)
+[![License](https://img.shields.io/github/license/ndejong/ouilookup.svg)](https://github.com/ndejong/ouilookup)
 
 A CLI tool and Python module for looking up hardware MAC addresses from the published OUI source list at ieee.org.
 
 ## Project
-* https://github.com/verbnetworks/ouilookup/
+* https://github.com/ndejong/ouilookup/
 
 ## Install
 #### via PyPi
 ```bash
 pip3 install ouilookup
-```
-
-#### Arch Linux (via AUR, and your favorite AUR-helper)
-```bash
-yay -S ouilookup-py3
-```
-
-#### via Source
-```bash
-git clone https://github.com/verbnetworks/ouilookup
-cd ouilookup
-python3 -m venv venv
-source venv/bin/activate
-pip3 install -r requirements.txt
-python3 setup.py clean
-python3 setup.py test
-python3 setup.py install
 ```
 
 ## Versions
@@ -39,37 +22,37 @@ standard versioning scheme (eg v0.2.0).
 
 ## CLI usage
 ```text
-usage: ouilookup [-h] [-q <hwaddr> | -u | -un | -s] [-d]
+usage: ouilookup [-h] [-q [<hwaddr> ...] | -s | -u | -ul <filename>] [-d] [-df <data-file>]
 
-ouilookup v0.0.2
+ouilookup v0.3.0
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
-  -q <hwaddr>, --query <hwaddr>
-                        Query to locate matching MAC hardware address(es) from
-                        the oui database. Addresses may be expressed in
-                        formats with or without ":" or "-" separators. Use a
-                        space between addresses for more than one lookup in a
-                        single query line.
-  -u, --update          Download the latest oui.txt from "standards-
-                        oui.ieee.org" and parse it to generate a local
-                        oui.json for use by OuiLookup. The following paths (in
-                        order) are examined for write-access to save the
-                        oui.json data-file: /var/lib/ouilookup
-  -un, --update-no-download
-                        Parse the oui.txt file in the data-path and update the
-                        local oui.json data-file without downloading the
-                        latest oui.txt update from "standards-oui.ieee.org".
-  -s, --status          Return status information about the oui.json data-file
-                        available to OuiLookup.
+  -q [<hwaddr> ...], --query [<hwaddr> ...]
+                        Query to locate matching MAC hardware address(es) from 
+                        the oui ouilookup.json data file. Addresses may be 
+                        expressed in formats with or without ':' or '-' 
+                        separators. Use a space or comma between addresses to 
+                        query for more than one item in a single query.
+  -s, --status          Return status metadata about the ouilookup.json data 
+                        file.
+  -u, --update          Download the latest from 
+                        https://standards-oui.ieee.org/oui/oui.txt then parse 
+                        and save as a ouilookup.json data file.
+  -ul <filename>, --update-local <filename>
+                        Supply a local oui.txt then parse and save as a 
+                        ouilookup.json data file.
 
-  -d, --debug           Provide debug logging output to stderr.
+  -d, --debug           Enable debug logging
+  -df <data-file>, --data-file <data-file>
+                        Use a data file that is not in the default data file 
+                        search paths: /home/<user>/.local/ouilookup, 
+                        <package-path>/ouilookup/data, /var/lib/ouilookup
 
-A CLI tool for interfacing with the OuiLookup module that provides CLI access
-the query(), update() and status() functions. Outputs at the CLI are JSON
-formatted thus allowing for easy chaining to other toolchains. The update()
-function updates directly from "standards-oui.ieee.org" and the ouilookup
-package provides an internal fallback oui.txt updated at time of packaging.
+A CLI tool for interfacing with the OuiLookup module that provides CLI access 
+the query(), update() and status() functions. Outputs at the CLI are JSON 
+formatted allowing for easy chaining with other toolchains. The update() 
+function updates directly from "standards-oui.ieee.org".
 ```
 
 ## Python3 Module usage
@@ -80,19 +63,17 @@ package provides an internal fallback oui.txt updated at time of packaging.
 >>> OuiLookup().query('00:00:aa:00:00:00')
 [{'0000AA000000': 'XEROX CORPORATION'}]
 
->>> OuiLookup().query('00:00:01:00:00:00 00-00-10-00-00-00 000011000000')
+>>> OuiLookup().query(['00:00:01:00:00:00','00-00-10-00-00-00','000011000000'])
 [{'000001000000': 'XEROX CORPORATION'}, {'000010000000': 'SYTEK INC.'}, {'000011000000': 'NORMEREL SYSTEMES'}]
 
 >>> OuiLookup().update()
-{'timestamp': '20200218Z234257', 'source_uri': 'http://standards-oui.ieee.org/oui/oui.txt', 'source_bytes': 4359180, 'source_md5': 'd901b821bbe2506e5837a1a522b48be6', 'source_sha1': '15511c01f00de7b4b9c03f081fc09693fca0f9ca', 'source_sha256': 'a32da3183b0e683082cdf35c85da78d407e017465f184dbd4f6aecd405e561eb', 'vendor_count': 27550}
-
+{'timestamp': '2023-05-13T14:11:17+00:00', 'source_url': 'https://standards-oui.ieee.org/oui/oui.txt', 'source_data_file': '/tmp/ouilookup-qm5aq0dk/oui.txt', 'source_bytes': '5468392', 'source_md5': '55a434f90da0c24c1a4fcfefe5b2b64b', 'source_sha1': 'dd5e8849ab8c65b2fb12c4b5aef290afee6bbfcd', 'source_sha256': 'af7e4bb1394109f4faad814074d3a6d5b792078074549a5d554c0904612c0bfc', 'vendor_count': '33808', 'data_file': '~/.local/ouilookup/ouilookup.json'}
 >>> OuiLookup().status()
-{'source_bytes': 4359180, 'source_md5': 'd901b821bbe2506e5837a1a522b48be6', 'source_sha1': '15511c01f00de7b4b9c03f081fc09693fca0f9ca', 'source_sha256': 'a32da3183b0e683082cdf35c85da78d407e017465f184dbd4f6aecd405e561eb', 'source_uri': 'http://standards-oui.ieee.org/oui/oui.txt', 'timestamp': '20200218Z234257', 'vendor_count': 27550, 'data_path': '/usr/local/lib/python3.6/dist-packages/ouilookup/data', 'data_file': '/usr/local/lib/python3.6/dist-packages/ouilookup/data/oui.json'}
+{'timestamp': '2023-05-13T14:11:17+00:00', 'source_url': 'https://standards-oui.ieee.org/oui/oui.txt', 'source_data_file': '/tmp/ouilookup-qm5aq0dk/oui.txt', 'source_bytes': '5468392', 'source_md5': '55a434f90da0c24c1a4fcfefe5b2b64b', 'source_sha1': 'dd5e8849ab8c65b2fb12c4b5aef290afee6bbfcd', 'source_sha256': 'af7e4bb1394109f4faad814074d3a6d5b792078074549a5d554c0904612c0bfc', 'vendor_count': '33808', 'data_file': '~/.local/ouilookup/ouilookup.json'}
 ```
 
 ## Authors
 * [Nicholas de Jong](https://nicholasdejong.com)
-* Managed by [Verb Networks](https://github.com/verbnetworks).
 
 ## License
 BSD-2-Clause - see LICENSE file for full details.

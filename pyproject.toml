@@ -1,0 +1,62 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "ouilookup"
+version = "0.3.0"
+description = "A Python module (and CLI tool) for looking up hardware MAC addresses from the OUI source at ieee.org."
+authors = ["Nicholas de Jong <contact@nicholasdejong.com>"]
+license = "BSD-2-Clause"
+readme = "readme.md"
+packages = [{ include = "ouilookup", from = "src" }]
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "Topic :: System :: Networking :: Monitoring",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: BSD License",
+]
+keywords = ["ouilookup", "oui", "mac", "mac-address", "hw-address", "ether", "ethernet"]
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/ndejong/ouilookup/issues"
+Documentation = "https://github.com/ndejong/ouilookup"
+Homepage = "https://pypi.org/project/ouilookup/"
+Repository = "https://github.com/ndejong/ouilookup"
+
+[tool.poetry.scripts]
+ouilookup = "ouilookup.cli:cli"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+black = "^23.3"                 # https://pypi.org/project/black/#history
+flake8 = "^6.0"                 # https://pypi.org/project/flake8/#history
+isort = "^5.12"                 # https://pypi.org/project/isort/#history
+pytest = "^7.3"                 # https://pypi.org/project/pytest/#history
+safety = "2.4.0b1"              # https://pypi.org/project/safety/#history
+
+[tool.slap]
+typed = false
+release.branch = "dev"
+
+[tool.slap.test]
+pytest = "pytest tests/ -vv"
+check = "slap check"
+isort = "isort src/ tests/ --check-only"
+black = "black src/ tests/ --check"
+flake8 = "flake8 src/ tests/"
+safety = "pip freeze | safety check --stdin --output=text"
+
+[tool.slap.run]
+format = "black src/ tests/ && isort src/ tests/"
+
+[tool.isort]
+profile = "black"
+line_length = 120
+combine_as_imports = true
+
+[tool.black]
+line-length = 120

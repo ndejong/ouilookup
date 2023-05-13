@@ -4,50 +4,30 @@ on: [push]
 
 jobs:
 
-  build:
+  test:
+    name: "Test package"
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
-
+        python-version: ["3.10"]
     steps:
-    - name: Install actions/checkout@v2
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - uses: NiklasRosenstein/slap@gha/install/v1
 
-    - name: Install actions/setup-python@v2 for ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with: { python-version: "${{ matrix.python-version }}" }
 
-    - name: Python version
-      run: python -c "import sys; print(sys.version)"
-
-    - name: Install dependencies
+    - name: Create tester venv for slap-cli
       run: |
-        python -m pip install --upgrade pip
+        slap venv --create tester
+        slap install --use-venv=tester
 
-    - name: flake8 lint
+    - name: Validate and test with slap-cli
       run: |
-        python -m pip install --upgrade flake8
-        # https://flake8.pycqa.org/en/latest/user/error-codes.html
-        # https://pycodestyle.pycqa.org/en/latest/intro.html#error-codes
-        flake8 ./OuiLookup --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 ./OuiLookup --count --exit-zero --max-complexity=20 --max-line-length=120 --statistics --ignore=E402,F401
-
-    - name: python setup.py clean build
-      run: |
-        python -m pip install --upgrade wheel setuptools
-        python setup.py clean build
-
-    - name: pytest
-      run: |
-        python -m pip install --upgrade pytest
-        pytest
-
-    - name: python setup.py install
-      run: |
-        python setup.py install
+        slap release --validate
+        slap test --use-venv=tester
+        slap install --use-venv=tester
 
     - name: ouilookup --status
       run: |

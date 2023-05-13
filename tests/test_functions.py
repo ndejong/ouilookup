@@ -44,7 +44,7 @@ def test_ouilookup_query_multi2():
 
 def test_ouilookup_query_multi3():
     OL = OuiLookup()
-    data = OL.query(expression=["00:00:01:00:00:00", "00-00-10-00-00-00,000011000000"])
+    data = OL.query(["00:00:01:00:00:00", "00-00-10-00-00-00,000011000000"])
     print(data)
 
     assert type(data) is list

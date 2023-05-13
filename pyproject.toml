@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ouilookup"
-version = "0.2.4"
+version = "0.3.0"
 description = "A Python module (and CLI tool) for looking up hardware MAC addresses from the OUI source at ieee.org."
 authors = ["Nicholas de Jong <contact@nicholasdejong.com>"]
 license = "BSD-2-Clause"
@@ -24,6 +24,9 @@ keywords = ["ouilookup", "oui", "mac", "mac-address", "hw-address", "ether", "et
 Documentation = "https://github.com/ndejong/ouilookup"
 Homepage = "https://pypi.org/project/ouilookup/"
 Repository = "https://github.com/ndejong/ouilookup"
+
+[tool.poetry.scripts]
+ouilookup = "ouilookup.cli:cli"
 
 [tool.poetry.dependencies]
 python = "^3.6"

@@ -31,5 +31,5 @@ jobs:
 
     - name: Test run the application
       run: |
-        slap venv --add tester
+        slap venv --activate tester
         ouilookup --status

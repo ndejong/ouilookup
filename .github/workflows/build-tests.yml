@@ -20,17 +20,16 @@ jobs:
 
     - name: Create a venv to operate within using slap-cli
       run: |
-        slap venv -gc tester
+        slap venv --create tester
 
     - name: Install, test and build a package to install
       run: |
-        slap venv -ga tester
-        slap install
-        slap test
-        mkdir test-build
-        slap publish --build-directory test-build --dry
+        slap install --use-venv=tester
+        slap test --use-venv=tester
+        mkdir build-tester
+        slap publish --build-directory build-tester --dry
 
     - name: Install the package from whl and run the application
       run: |
-        pip install test-build/*.whl
+        pip install build-tester/*.whl
         ouilookup --status

@@ -16,6 +16,11 @@ A CLI tool and Python module for looking up hardware MAC addresses from the publ
 pip3 install ouilookup
 ```
 
+#### Arch Linux (via AUR, and your favorite AUR-helper)
+```bash
+yay -S ouilookup-py3
+```
+
 ## Versions
 Legacy versions based on year-date (eg v2018.2) have been hard-deprecated in favour of a backward incompatible 
 standard versioning scheme (eg v0.2.0).

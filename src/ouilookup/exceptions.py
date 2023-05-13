@@ -1,0 +1,2 @@
+class OuiLookupException(Exception):
+    pass

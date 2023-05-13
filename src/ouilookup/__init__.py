@@ -2,7 +2,7 @@
 # Copyright (c) 2018-2023 Nicholas de Jong
 
 __author__ = "Nicholas de Jong <contact@nicholasdejong.com>"
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 __title__ = "ouilookup"
 __logger_name__ = "ouilookup"
 
